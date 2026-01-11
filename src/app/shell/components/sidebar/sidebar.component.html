@@ -1,69 +1,62 @@
-<nav [class.pb]="navExpanded()" [class.squeeze]="!navExpanded()">
-  <span (click)="toggleSidebar(!navExpanded())" [ngClass]="{ open: navExpanded() }" class="toggle-icon">
-    <!-- TODO: You can put any icon here, below span is just temporary for demo purpose  -->
-    <span style="color: var(--gray-400)"><</span>
-  </span>
-
-  <div class="logo-container" routerLink="/">
-    <img alt="Logo" class="logo" src="images/placeholder.png" />
-    <h4>Brand Title</h4>
+<nav class="h-screen flex flex-col">
+  <div class="p-6 border-b border-neutral-200">
+    <button (click)="toggleSidebar(!navExpanded())" class="lg:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors" aria-label="Toggle Sidebar">
+      <i class="pi pi-times text-xl"></i>
+    </button>
+    <div class="flex items-center gap-2 mt-2">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center flex-shrink-0">
+        <span class="text-white font-bold text-sm">A</span>
+      </div>
+      <div *ngIf="navExpanded()" class="flex-1">
+        <h3 class="font-bold text-neutral-900">MyApp</h3>
+        <p class="text-xs text-neutral-500">Dashboard</p>
+      </div>
+    </div>
   </div>
 
-  <div class="navbar-menu-items" dir="auto">
+  <div class="flex-1 overflow-y-auto px-4 py-6 space-y-2">
     @for (item of sidebarItems(); track item; let i = $index) {
       @if (shellService.allowedAccess(item)) {
-        <div class="menu">
-          @if (!item.divider) {
-            <a (click)="activateSidebarItem(i)" [class.active]="item.active" [ngClass]="{ disabled: item.disabled }" class="menu-item" id="menu-item-{{ i }}">
-              <div class="item">
-                @if (item.icon) {
-                  <!-- TODO This below i tag is temporary for demo purposes replace with proper icon passed in menu item -->
-                  @if (item.active) {
-                    <i style="color: var(--gray-400)">^</i>
-                  } @else {
-                    <i style="color: var(--sidebar-icon-color)">^</i>
-                  }
-                }
-                <span>{{ item.title | translate }}</span>
-              </div>
+        @if (!item.divider) {
+          <button
+            (click)="activateSidebarItem(i)"
+            [class.bg-primary-50]="item.active"
+            [class.text-primary-600]="item.active"
+            [disabled]="item.disabled"
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-neutral-100 transition-colors"
+            [id]="'menu-item-' + i"
+          >
+            <i [class]="'pi ' + (item.icon || 'pi-home') + ' text-lg'"></i>
+            @if (navExpanded()) {
+              <span class="flex-1">{{ item.title | translate }}</span>
               @if (item.subItems && item.subItems.length) {
-                <span [ngClass]="{ open: sidebarExtendedItem() === i }" class="submenu-icon">
-                  <!-- TODO This below i tag is temporary for demo purposes, use any up down arrow icon -->
-                  @if (item.subItems && item.subItems.length && item.active) {
-                    <!-- Active Icon -->
-                    <i style="color: var(--gray-400)">^</i>
-                  } @else if (item.subItems && item.subItems.length && !item.active) {
-                    <!-- Inactive Icon -->
-                    <i style="color: var(--sidebar-icon-color)">^</i>
-                  }
-                </span>
+                <i [class]="sidebarExtendedItem() === i ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
               }
-            </a>
-            @if (item.subItems && item.subItems.length) {
-              <ul [style.display]="sidebarExtendedItem() === i ? 'block' : 'none'" class="sub-menu-items">
-                @for (subItem of item.subItems; track subItem) {
-                  @if (shellService.allowedAccess(subItem)) {
-                    <li [class.disabled]="subItem.disabled">
-                      <a (click)="activateSidebarSubItem(i, subItem)" [ngClass]="{ disabled: subItem.disabled }" [routerLink]="subItem.href || undefined" routerLinkActive="active">
-                        <!-- TODO This below i tag is temporary for demo purposes replace with proper icon passed in submenu item -->
-                        @if (item.subItems && item.subItems.length && item.active) {
-                          <!-- Active Icon -->
-                          <i style="color: var(--gray-400)">^</i>
-                        } @else if (item.subItems && item.subItems.length && !item.active) {
-                          <!-- Inactive Icon -->
-                          <i style="color: var(--sidebar-icon-color)">^</i>
-                        }
-                        <span>{{ subItem.title | translate }}</span>
-                      </a>
-                    </li>
-                  }
-                }
-              </ul>
             }
-          } @else {
-            <span class="divider"></span>
+          </button>
+
+          @if (item.subItems && item.subItems.length && sidebarExtendedItem() === i && navExpanded()) {
+            <div class="pl-4 space-y-1 border-l-2 border-primary-200">
+              @for (subItem of item.subItems; track subItem) {
+                @if (shellService.allowedAccess(subItem)) {
+                  <button
+                    (click)="activateSidebarSubItem(i, subItem)"
+                    [disabled]="subItem.disabled"
+                    [class.bg-primary-100]="subItem.active"
+                    [class.text-primary-600]="subItem.active"
+                    class="w-full flex items-center gap-2 px-4 py-2 text-sm rounded-lg text-left hover:bg-neutral-100 transition-colors text-neutral-700"
+                    [routerLink]="subItem.href || undefined"
+                  >
+                    @if (subItem.icon) {
+                      <i [class]="'pi ' + subItem.icon"></i>
+                    }
+                    <span>{{ subItem.title | translate }}</span>
+                  </button>
+                }
+              }
+            </div>
           }
-        </div>
+        }
       }
     }
   </div>

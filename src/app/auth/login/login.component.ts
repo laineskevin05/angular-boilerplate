@@ -5,12 +5,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LanguageSelectorComponent } from '@app/i18n';
 import { TranslateModule } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ButtonModule } from 'primeng/button';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-  imports: [LanguageSelectorComponent, TranslateModule],
+  standalone: true,
+  imports: [LanguageSelectorComponent, TranslateModule, ButtonModule, CommonModule],
 })
 export class LoginComponent {
   private readonly _router = inject(Router);
@@ -36,7 +39,7 @@ export class LoginComponent {
           }
         },
         error: (error) => {
-          // Handle the error here
+          console.error('Login failed', error);
         },
       });
   }

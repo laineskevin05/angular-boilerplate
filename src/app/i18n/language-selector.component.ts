@@ -1,12 +1,13 @@
 import { Component, ElementRef, HostListener, Input } from '@angular/core';
 import { I18nService } from './i18n.service';
-import { NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-language-selector',
   templateUrl: './language-selector.component.html',
   styleUrls: ['./language-selector.component.scss'],
-  imports: [NgClass],
+  standalone: true,
+  imports: [CommonModule],
 })
 export class LanguageSelectorComponent {
   @Input() inNavbar = true;

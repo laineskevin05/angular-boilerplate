@@ -3,12 +3,13 @@ import { ShellService } from '@app/shell/services/shell.service';
 import { Router, RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
-import { NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-shell',
   templateUrl: './shell.component.html',
-  imports: [RouterOutlet, HeaderComponent, SidebarComponent, NgClass],
+  standalone: true,
+  imports: [RouterOutlet, HeaderComponent, SidebarComponent, CommonModule],
 })
 export class ShellComponent implements OnInit {
   private readonly _shellService = inject(ShellService);
@@ -22,6 +23,10 @@ export class ShellComponent implements OnInit {
 
   sidebarToggle(toggleState: boolean) {
     this.isSidebarActive.set(toggleState);
+  }
+
+  closeSidebar() {
+    this.isSidebarActive.set(false);
   }
 
   private _reloadCurrentRoute(path?: string) {
