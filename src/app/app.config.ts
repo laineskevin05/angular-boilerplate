@@ -10,6 +10,8 @@ import { RouteReusableStrategy } from '@core/helpers';
 import { provideServiceWorker } from '@angular/service-worker';
 import { SocketIoModule } from '@core/socket-io';
 import { provideHotToastConfig } from '@ngxpert/hot-toast';
+import { providePrimeNG } from 'primeng/config';
+import Nora from '@primeuix/themes/nora';
 
 if (environment.production) {
   enableProdMode();
@@ -59,6 +61,13 @@ export const appConfig: ApplicationConfig = {
       autoClose: true,
       position: 'top-right',
       theme: 'snackbar',
+    }),
+
+    // providePrimeNG is required for PrimeNG with additional configuration
+    providePrimeNG({
+      theme: {
+        preset: Nora,
+      },
     }),
 
     // provideHttpClient is required for Angular's HttpClient with additional configuration, which includes interceptors from DI (dependency injection) , means to use class based interceptors

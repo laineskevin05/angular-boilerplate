@@ -10,38 +10,18 @@
     <app-language-selector></app-language-selector>
 
     <div class="relative">
-      <button
-        (click)="toggleUserMenu()"
-        class="p-2 rounded-lg hover:bg-neutral-100 transition-colors text-neutral-600"
-        aria-label="User Menu"
-      >
+      <button (click)="toggleUserMenu()" class="p-2 rounded-lg hover:bg-neutral-100 transition-colors text-neutral-600" aria-label="User Menu">
         <i class="pi pi-user text-lg"></i>
       </button>
 
       @if (showUserMenu()) {
         <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-neutral-200 z-50">
-          <a
-            routerLink="/profile"
-            (click)="closeUserMenu()"
-            class="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 first:rounded-t-lg transition-colors"
-          >
+          <a routerLink="/profile" (click)="closeUserMenu()" class="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 first:rounded-t-lg transition-colors">
             <i class="pi pi-user mr-2"></i> Profile
           </a>
-          <a
-            routerLink="/settings"
-            (click)="closeUserMenu()"
-            class="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 transition-colors"
-          >
-            <i class="pi pi-cog mr-2"></i> Settings
-          </a>
+          <a routerLink="/settings" (click)="closeUserMenu()" class="block px-4 py-2 text-neutral-700 hover:bg-neutral-50 transition-colors"> <i class="pi pi-cog mr-2"></i> Settings </a>
           <hr class="my-1 border-neutral-200" />
-          <a
-            routerLink="/logout"
-            (click)="closeUserMenu()"
-            class="block px-4 py-2 text-red-600 hover:bg-red-50 last:rounded-b-lg transition-colors"
-          >
-            <i class="pi pi-sign-out mr-2"></i> Logout
-          </a>
+          <a routerLink="/logout" (click)="closeUserMenu()" class="block px-4 py-2 text-red-600 hover:bg-red-50 last:rounded-b-lg transition-colors"> <i class="pi pi-sign-out mr-2"></i> Logout </a>
         </div>
       }
     </div>
