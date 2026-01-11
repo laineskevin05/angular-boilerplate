@@ -1,10 +1,9 @@
-import { ApplicationConfig, enableProdMode, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, enableProdMode, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { PreloadAllModules, provideRouter, RouteReuseStrategy, withEnabledBlockingInitialNavigation, withInMemoryScrolling, withPreloading, withRouterConfig } from '@angular/router';
 
 import { routes } from './app.routes';
 import { TranslateModule } from '@ngx-translate/core';
 import { environment } from '@env/environment';
-import { ShellModule } from './shell/shell.module';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ApiPrefixInterceptor, ErrorHandlerInterceptor } from '@core/interceptors';
 import { RouteReusableStrategy } from '@core/helpers';
@@ -18,13 +17,12 @@ if (environment.production) {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    // provideZoneChangeDetection is required for Angular's zone.js
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    // provideZonelessChangeDetection enables zoneless change detection
+    provideZonelessChangeDetection(),
 
-    // import providers from other modules (e.g. TranslateModule, ShellModule, socketModule), which follow the older pattern to import modules
+    // import providers from other modules (e.g. TranslateModule, socketModule), which follow the older pattern to import modules
     importProvidersFrom(
       TranslateModule.forRoot(),
-      ShellModule,
       SocketIoModule.forRoot({
         rootUrl: null, // TODO: provide your own socket.io server URL
         options: {

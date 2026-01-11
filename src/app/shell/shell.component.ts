@@ -1,28 +1,27 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ShellService } from '@app/shell/services/shell.service';
-import { UntilDestroy } from '@ngneat/until-destroy';
-import { Router } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
+import { HeaderComponent } from './components/header/header.component';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { NgClass } from '@angular/common';
 
-@UntilDestroy()
 @Component({
   selector: 'app-shell',
   templateUrl: './shell.component.html',
-  standalone: false,
+  imports: [RouterOutlet, HeaderComponent, SidebarComponent, NgClass],
 })
 export class ShellComponent implements OnInit {
-  isSidebarActive = false;
+  private readonly _shellService = inject(ShellService);
+  private readonly _router = inject(Router);
 
-  constructor(
-    private readonly _shellService: ShellService,
-    private readonly _router: Router,
-  ) {}
+  isSidebarActive = signal(false);
 
   ngOnInit() {
     // this._socketService.connect();
   }
 
   sidebarToggle(toggleState: boolean) {
-    this.isSidebarActive = toggleState;
+    this.isSidebarActive.set(toggleState);
   }
 
   private _reloadCurrentRoute(path?: string) {

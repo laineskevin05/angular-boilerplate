@@ -1,45 +1,20 @@
-import { Route, Router, Routes } from '@angular/router';
-
-import { AuthenticationGuard, PERMISSIONS, PermissionService } from '@app/auth';
-import { ShellComponent } from '@app/shell/shell.component';
+import { inject, Injectable, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { PERMISSIONS, PermissionService } from '@app/auth';
 import { BehaviorSubject } from 'rxjs';
-import { Injectable } from '@angular/core';
 import { NavMenuItem } from '@core/interfaces';
-
-/**
- * Provides helper methods to create routes.
- */
-export class Shell {
-  /**
-   * Creates routes using the shell component and authentication.
-   * @param routes The routes to add.
-   * @return The new route using shell as the base.
-   */
-  static childRoutes(routes: Routes): Route {
-    return {
-      path: '',
-      component: ShellComponent,
-      children: routes,
-      canActivate: [AuthenticationGuard],
-
-      data: { reuse: true },
-    };
-  }
-}
 
 @Injectable({
   providedIn: 'root',
 })
 export class ShellService {
+  private readonly _router = inject(Router);
+  public readonly _permissionService = inject(PermissionService);
+
   navicon = new BehaviorSubject<NavMode>(NavMode.Free);
   navModeSubject = new BehaviorSubject<NavMode>(NavMode.Free);
   navMode$ = this.navModeSubject.asObservable();
   navicon$ = this.navModeSubject.asObservable();
-
-  constructor(
-    private readonly _router: Router,
-    public readonly _permissionService: PermissionService,
-  ) {}
 
   allowedAccess(item: NavMenuItem): boolean {
     if (item.roles && item.roles.length) {

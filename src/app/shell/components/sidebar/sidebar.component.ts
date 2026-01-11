@@ -1,77 +1,76 @@
-import { Component, OnInit } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { Component, effect, inject, OnInit, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { environment } from '@env/environment';
-import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { filter } from 'rxjs/operators';
 import { NavMode, ShellService } from '@app/shell/services/shell.service';
 import { webSidebarMenuItems } from '@core/constants';
 import { CredentialsService } from '@auth';
 import { NavMenuItem } from '@core/interfaces';
+import { NgClass } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-@UntilDestroy({ checkProperties: true })
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
-  standalone: false,
+  imports: [NgClass, RouterLink, TranslateModule],
 })
 export class SidebarComponent implements OnInit {
-  version: string = environment.version;
-  year: number = new Date().getFullYear();
-  sidebarItems: NavMenuItem[] = [];
-  sidebarExtendedItem = -1;
-  navExpanded = true;
+  private readonly _router = inject(Router);
+  private readonly _credentialsService = inject(CredentialsService);
+  public shellService = inject(ShellService);
 
-  constructor(
-    private readonly _router: Router,
-    private readonly _credentialsService: CredentialsService,
-    public shellService: ShellService,
-  ) {
-    this.sidebarItems = webSidebarMenuItems;
-  }
+  version = signal(environment.version);
+  year = signal(new Date().getFullYear());
+  sidebarItems = signal<NavMenuItem[]>(webSidebarMenuItems);
+  sidebarExtendedItem = signal(-1);
+  navExpanded = signal(true);
 
-  ngOnInit(): void {
-    this.shellService.activeNavTab(this.sidebarItems, this.sidebarExtendedItem);
-
+  constructor() {
     this._router.events
-      .pipe(untilDestroyed(this))
-      .pipe(filter((event) => event instanceof NavigationEnd))
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
       .subscribe(() => {
-        this.shellService.activeNavTab(this.sidebarItems, this.sidebarExtendedItem);
+        this.shellService.activeNavTab(this.sidebarItems(), this.sidebarExtendedItem());
       });
 
-    this.shellService.navMode$.pipe(untilDestroyed(this)).subscribe((mode) => {
-      /**
-       * Change the second condition to mode === NavMode.Locked to make navbar by default collapsed
-       */
-      this.navExpanded = mode === NavMode.Free;
+    this.shellService.navMode$.pipe(takeUntilDestroyed()).subscribe((mode) => {
+      this.navExpanded.set(mode === NavMode.Free);
     });
   }
 
+  ngOnInit(): void {
+    this.shellService.activeNavTab(this.sidebarItems(), this.sidebarExtendedItem());
+  }
+
   toggleSidebar(isEnterEvent: boolean): void {
-    this.shellService.navMode$.pipe(untilDestroyed(this)).subscribe((mode) => {
+    this.shellService.navMode$.pipe(takeUntilDestroyed()).subscribe((mode) => {
       if (isEnterEvent) {
-        this.navExpanded = true;
+        this.navExpanded.set(true);
       } else if (!isEnterEvent && mode === NavMode.Free) {
-        this.navExpanded = false;
+        this.navExpanded.set(false);
       }
     });
   }
 
   activateSidebarItem(index: number): void {
-    const item = this.sidebarItems[index];
+    const items = this.sidebarItems();
+    const item = items[index];
     if (item.disabled) return;
 
-    if (index !== this.sidebarExtendedItem) {
-      this.sidebarExtendedItem = index;
+    if (index !== this.sidebarExtendedItem()) {
+      this.sidebarExtendedItem.set(index);
     } else {
-      this.sidebarExtendedItem = -1; // Toggle the same item
+      this.sidebarExtendedItem.set(-1);
     }
 
-    this.shellService.activateNavItem(index, this.sidebarItems);
+    this.shellService.activateNavItem(index, this.sidebarItems());
   }
 
   activateSidebarSubItem(index: number, subItem: NavMenuItem): void {
-    this.shellService.activateNavSubItem(index, subItem, this.sidebarItems);
+    this.shellService.activateNavSubItem(index, subItem, this.sidebarItems());
   }
 }

@@ -1,42 +1,36 @@
-import { Component } from '@angular/core';
-
+import { Component, inject, signal } from '@angular/core';
 import { environment } from '@env/environment';
-import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { AuthenticationService } from '@app/auth';
 import { ActivatedRoute, Router } from '@angular/router';
+import { LanguageSelectorComponent } from '@app/i18n';
+import { TranslateModule } from '@ngx-translate/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-@UntilDestroy()
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
-  standalone: false,
+  imports: [LanguageSelectorComponent, TranslateModule],
 })
 export class LoginComponent {
-  version: string | null = environment.version;
+  private readonly _router = inject(Router);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _authService = inject(AuthenticationService);
 
-  constructor(
-    private readonly _router: Router,
-    private readonly _route: ActivatedRoute,
-    private readonly _authService: AuthenticationService,
-  ) {}
+  version = signal<string | null>(environment.version);
 
   login() {
-    // Here You can call the login method from the AuthenticationService directly and pass the required parameters.
-    // setting credentials and other logic will be handled in the AuthenticationService.
     this._authService
       .login({
         username: 'johndoe',
         password: '123456',
       })
-      .pipe(untilDestroyed(this))
+      .pipe(takeUntilDestroyed())
       .subscribe({
         next: (res) => {
-          // Navigate to the home page or any other page after successful login.
           if (res) {
             console.log('Login successful');
             this._router.navigate([this._route.snapshot.queryParams['redirect'] || '/dashboard'], { replaceUrl: true }).then(() => {
-              // Handle the navigation
               console.log('Navigated to dashboard');
             });
           }

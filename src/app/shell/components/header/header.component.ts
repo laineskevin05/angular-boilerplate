@@ -1,13 +1,13 @@
-import { Component } from '@angular/core';
-import { UntilDestroy } from '@ngneat/until-destroy';
+import { Component, signal } from '@angular/core';
+import { LanguageSelectorComponent } from '@app/i18n';
+import { TranslateModule } from '@ngx-translate/core';
 
-@UntilDestroy()
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  standalone: false,
+  imports: [LanguageSelectorComponent, TranslateModule],
 })
 export class HeaderComponent {
-  menuHidden = true;
+  menuHidden = signal(true);
 }

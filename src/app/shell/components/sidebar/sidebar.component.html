@@ -1,5 +1,5 @@
-<nav [class.pb]="navExpanded" [class.squeeze]="!navExpanded">
-  <span (click)="toggleSidebar(!navExpanded)" [ngClass]="{ open: navExpanded }" class="toggle-icon">
+<nav [class.pb]="navExpanded()" [class.squeeze]="!navExpanded()">
+  <span (click)="toggleSidebar(!navExpanded())" [ngClass]="{ open: navExpanded() }" class="toggle-icon">
     <!-- TODO: You can put any icon here, below span is just temporary for demo purpose  -->
     <span style="color: var(--gray-400)"><</span>
   </span>
@@ -10,7 +10,7 @@
   </div>
 
   <div class="navbar-menu-items" dir="auto">
-    @for (item of sidebarItems; track item; let i = $index) {
+    @for (item of sidebarItems(); track item; let i = $index) {
       @if (shellService.allowedAccess(item)) {
         <div class="menu">
           @if (!item.divider) {
@@ -27,7 +27,7 @@
                 <span>{{ item.title | translate }}</span>
               </div>
               @if (item.subItems && item.subItems.length) {
-                <span [ngClass]="{ open: sidebarExtendedItem === i }" class="submenu-icon">
+                <span [ngClass]="{ open: sidebarExtendedItem() === i }" class="submenu-icon">
                   <!-- TODO This below i tag is temporary for demo purposes, use any up down arrow icon -->
                   @if (item.subItems && item.subItems.length && item.active) {
                     <!-- Active Icon -->
@@ -40,7 +40,7 @@
               }
             </a>
             @if (item.subItems && item.subItems.length) {
-              <ul [style.display]="sidebarExtendedItem === i ? 'block' : 'none'" class="sub-menu-items">
+              <ul [style.display]="sidebarExtendedItem() === i ? 'block' : 'none'" class="sub-menu-items">
                 @for (subItem of item.subItems; track subItem) {
                   @if (shellService.allowedAccess(subItem)) {
                     <li [class.disabled]="subItem.disabled">

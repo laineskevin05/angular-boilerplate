@@ -1,46 +1,48 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { I18nService, LanguageSelectorComponent } from '@app/i18n';
+import { I18nService } from '@app/i18n';
 import { Title } from '@angular/platform-browser';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { environment } from '@env/environment';
 import { filter, merge } from 'rxjs';
-import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { AppUpdateService, Logger } from '@core/services';
 import { SocketIoService } from '@core/socket-io';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-@UntilDestroy()
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, TranslateModule],
   template: '<router-outlet></router-outlet>',
   styleUrl: './app.component.scss',
 })
-export class AppComponent implements OnInit, OnDestroy {
-  title = 'angular-boilerplate';
+export class AppComponent implements OnInit {
+  private readonly _router = inject(Router);
+  private readonly _titleService = inject(Title);
+  private readonly _translateService = inject(TranslateService);
+  private readonly _i18nService = inject(I18nService);
+  private readonly _socketService = inject(SocketIoService);
+  private readonly _updateService = inject(AppUpdateService);
+  private readonly _destroyRef = inject(DestroyRef);
 
-  constructor(
-    private readonly _router: Router,
-    private readonly _titleService: Title,
-    private readonly _translateService: TranslateService,
-    private readonly _i18nService: I18nService,
-    private readonly _socketService: SocketIoService,
-    private readonly _updateService: AppUpdateService,
-  ) {}
+  title = signal('angular-boilerplate');
+
+  constructor() {
+    this._destroyRef.onDestroy(() => {
+      this._i18nService.destroy();
+    });
+  }
 
   ngOnInit() {
-    // Setup logger
     if (environment.production) {
       Logger.enableProductionMode();
     }
 
-    // Initialize i18nService with default language and supported languages
     this._i18nService.init(environment.defaultLanguage, environment.supportedLanguages);
 
     const onNavigationEnd = this._router.events.pipe(filter((event) => event instanceof NavigationEnd));
 
     merge(this._translateService.onLangChange, onNavigationEnd)
-      .pipe(untilDestroyed(this))
+      .pipe(takeUntilDestroyed(this._destroyRef))
       .subscribe((event) => {
         const titles = this.getTitle(this._router.routerState, this._router.routerState.root);
 
@@ -58,10 +60,7 @@ export class AppComponent implements OnInit, OnDestroy {
         }
       });
 
-    // Connect to Socket
     this._socketService.connect();
-
-    // update service
     this._updateService.subscribeForUpdates();
   }
 
@@ -75,9 +74,5 @@ export class AppComponent implements OnInit, OnDestroy {
       data.push(...this.getTitle(state, state.firstChild(parent)));
     }
     return data;
-  }
-
-  ngOnDestroy() {
-    this._i18nService.destroy();
   }
 }
